@@ -3,6 +3,7 @@ import 'package:albalarma/application/audio/cubit/audio_cubit.dart';
 import 'package:albalarma/application/location/location_cubit.dart';
 import 'package:albalarma/dependency_injection/injection.dart';
 import 'package:albalarma/domain/location/location.dart';
+import 'package:albalarma/presentation/common/app_icon.dart';
 import 'package:albalarma/presentation/features/alarm/widgets/alarm_dial.dart';
 import 'package:albalarma/presentation/routes/router.gr.dart';
 import 'package:auto_route/auto_route.dart';
@@ -43,7 +44,15 @@ class _AlarmPageState extends State<AlarmPage> {
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
-            title: Text("Albalarma"),
+            title: Row(
+              children: [
+                AppIconWidget(imageSize: 30),
+                SizedBox(
+                  width: 20,
+                ),
+                Text("Albalarma"),
+              ],
+            ),
             actions: [
               IconButton(
                   icon: const Icon(Icons.radio),
@@ -141,6 +150,7 @@ class _AlarmPageState extends State<AlarmPage> {
               ),
               Text("${location.name} Sun Times"),
               DataTable(
+                columnSpacing: 30,
                 columns: const <DataColumn>[
                   DataColumn(
                     label: Text(
@@ -177,8 +187,19 @@ class _AlarmPageState extends State<AlarmPage> {
       onRefresh: () => context.read<LocationCubit>().reFetchSuntimes(location),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        child: Center(
-          child: Text("ERROROROROROR"),
+        child: Container(
+          height: MediaQuery.of(context).size.height - 200,
+          child: Center(
+            child: Column(
+              children: [
+                Text("ERROROROROROR"),
+                SizedBox(
+                  height: 20,
+                ),
+                Text("Pull down to reload"),
+              ],
+            ),
+          ),
         ),
       ),
     );

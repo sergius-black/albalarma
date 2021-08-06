@@ -5,10 +5,12 @@ import 'package:albalarma/presentation/routes/router.gr.dart';
 import 'package:flutter/material.dart';
 
 import 'package:injectable/injectable.dart';
+import 'package:flutter/services.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   await configureInjection(Environment.prod);
   runApp(MyApp());
 }
@@ -38,11 +40,11 @@ class _MyAppState extends State<MyApp> {
             routeInformationParser: _router.defaultRouteParser(),
             //theme
             theme: ThemeData.dark().copyWith(
-              primaryColor: Colors.green[800],
+              primaryColor: Colors.green[600],
               accentColor: Colors.green[300],
               elevatedButtonTheme: ElevatedButtonThemeData(
                 style: ElevatedButton.styleFrom(
-                    primary: Colors.green[800],
+                    primary: Colors.green[600],
                     textStyle:
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),

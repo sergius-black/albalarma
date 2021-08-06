@@ -1,5 +1,6 @@
 import 'package:albalarma/dependency_injection/injection.dart';
 import 'package:albalarma/domain/location/location.dart';
+import 'package:albalarma/infrastructure/local_db/local_db_repository.dart';
 import 'package:albalarma/infrastructure/location/location_repository.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:bloc/bloc.dart';
@@ -13,6 +14,7 @@ class LocationCubit extends Cubit<LocationState> {
   LocationCubit() : super(LocationState.initial());
 
   final LocationRepository _locationRepository = getIt<LocationRepository>();
+  final LocalDatabase _db = getIt<LocalDatabase>();
 
   Future<void> getPichilemu() async {
     final location = await _locationRepository.getPichilemuSuntimes();
@@ -26,13 +28,15 @@ class LocationCubit extends Cubit<LocationState> {
   }
 
   Future<void> getLocation() async {
-    emit(LocationState.requesting());
-    final location = await _locationRepository.getCurrentLocationSuntimes();
     try {
+      emit(LocationState.requesting());
+      final location = await _locationRepository.getCurrentLocationSuntimes();
+      await _db.saveLocation(location);
       emit(LocationState.loaded(location));
     } catch (err) {
-      emit(LocationState.error(
-          "Couldn't fetch location. Is the device online?", location));
+      Location? lastLocation = _db.getLastLocation();
+      emit(LocationState.error("Couldn't fetch location. Is the device online?",
+          lastLocation ?? Location.pichilemu()));
     }
   }
 

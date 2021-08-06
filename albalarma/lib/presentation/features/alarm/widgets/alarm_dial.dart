@@ -2,6 +2,8 @@ import 'package:albalarma/application/alarm/cubit/alarm_cubit.dart';
 import 'package:albalarma/dependency_injection/injection.dart';
 import 'package:albalarma/domain/alarm/alarm.dart';
 import 'package:albalarma/infrastructure/alarm_service/alarm_repository.dart';
+import 'package:albalarma/infrastructure/local_db/local_db_repository.dart';
+import 'package:albalarma/presentation/common/app_icon.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -46,16 +48,16 @@ class AlarmOffsetDial extends StatelessWidget {
     return BlocBuilder<AlarmCubit, AlarmState>(
       builder: (context, state) {
         if (state is AlarmInitial) {
-          return buildAlarmInitial(context);
+          context.read<AlarmCubit>().getCurrentAlarmStatus();
+          return buildSettingAlarm();
+          // return buildAlarmInitial(context);
         } else if (state is Off) {
-          return buildAlarmOff(
-            context,
-            state.alarm,
-          );
+          return buildAlarmOff(context, state.alarm, state.initialOffset);
         } else if (state is SettingAlarm) {
           return buildSettingAlarm();
         } else if (state is AlarmSet) {
-          return buildAlarmSet(context);
+          return buildAlarmSet(
+              context, state.alarm, state.offset, state.orchestratorState);
         } else {
           return buildAlarmError(context);
         }
@@ -76,7 +78,7 @@ class AlarmOffsetDial extends StatelessWidget {
   Widget buildAlarmInitial(BuildContext context) {
     return Container(
       child: Column(
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -86,52 +88,48 @@ class AlarmOffsetDial extends StatelessWidget {
             ),
           ),
           Divider(),
-          Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Container(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text("Tomorrow's Sunrise:"),
-                    Text(getTimeString(sunrise)),
-                    SizedBox(
-                      height: 15,
+          Container(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Nexts Sunrise:"),
+                  Text(getTimeString(sunrise)),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Divider(),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      height: 100,
+                      width: 200,
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            context.read<AlarmCubit>().setSunriseTime(sunrise),
+                        child: Text("Add Alarm"),
+                      ),
                     ),
-                    Divider(),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        height: 100,
-                        width: 200,
-                        child: ElevatedButton(
-                          onPressed: () => context
-                              .read<AlarmCubit>()
-                              .setSunriseTime(sunrise),
-                          child: Text("Add Alarm"),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      height: 80,
+                      width: 150,
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            context.read<AlarmCubit>().cancelAlarms(),
+                        child: Text(
+                          "Cancel Alarms",
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        height: 80,
-                        width: 150,
-                        child: ElevatedButton(
-                          onPressed: () =>
-                              context.read<AlarmCubit>().cancelAlarms(),
-                          child: Text(
-                            "Cancel Alarms",
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
+                  )
+                ],
               ),
             ),
           ),
@@ -140,116 +138,124 @@ class AlarmOffsetDial extends StatelessWidget {
     );
   }
 
-  Widget buildAlarmOff(
-    BuildContext context,
-    Alarm alarm,
-  ) {
+  Widget buildAlarmOff(BuildContext context, Alarm alarm, int timeOffset) {
     AlarmRepository _alarmRepo = getIt<AlarmRepository>();
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    // LocalDatabase _db = getIt<LocalDatabase>();
+    int picketOffset = ((timeOffset / 5) + 12).toInt();
+
+    String alarmSetString = alarm.alarmTime != null
+        ? getTimeString(alarm.alarmTime!)
+        : "Alarm not set";
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  child: Column(
+                    children: [
+                      Text("Tomorrow's Sunrise:"),
+                      Text(getTimeString(sunrise)),
+                      Divider(),
+                      Text("Alarm Time:"),
+                      Text(alarmSetString),
+                    ],
+                  ),
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Container(
+                    height: 150,
+                    width: 100,
+                    child: CupertinoPicker(
+                      itemExtent: 25,
+                      onSelectedItemChanged: (int offset) =>
+                          setTimeOffset(context, offset),
+                      children: options,
+                      scrollController: FixedExtentScrollController(
+                          initialItem: picketOffset),
+                      backgroundColor: Colors.green[600],
+                      magnification: 1.5,
+                      diameterRatio: 1.3,
+                      squeeze: 1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 15,
+          ),
+          DropdownButton<String>(
+            value: alarm.radio,
+            icon: Icon(
+              Icons.radio,
+              color: Colors.green[800],
+            ),
+            iconSize: 24,
+            elevation: 16,
+            style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Colors.green[800]),
+            underline: Container(
+              height: 2,
+              color: Colors.greenAccent,
+            ),
+            onChanged: (String? newRadio) {
+              context.read<AlarmCubit>().setAlarmRadio(radio: newRadio!);
+            },
+            items: <String>[
+              'Futuro',
+              'BioBio',
+              'Adn',
+              'Rock&Pop',
+              "Cooperativa",
+              "Concierto"
+            ].map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                child: Column(
-                  children: [
-                    Text("Tomorrow's Sunrise:"),
-                    Text(getTimeString(sunrise)),
-                    Divider(),
-                    Text("Alarm Time:"),
-                    Text(getTimeString(alarm.alarmTime)),
-                  ],
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  height: 80,
+                  width: 150,
+                  child: ElevatedButton(
+                      onPressed: () => context.read<AlarmCubit>().setAlarm(),
+                      child: Text("Set Alarm!")),
                 ),
               ),
-              Container(
-                height: 150,
-                width: 100,
-                child: CupertinoPicker(
-                  itemExtent: 25,
-                  onSelectedItemChanged: (int offset) =>
-                      setTimeOffset(context, offset),
-                  children: options,
-                  scrollController:
-                      FixedExtentScrollController(initialItem: 12),
-                  backgroundColor: Colors.green[800],
-                  magnification: 1.5,
-                  diameterRatio: 1.3,
-                  squeeze: 1,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  height: 80,
+                  width: 150,
+                  child: ElevatedButton(
+                      onPressed: () => context.read<AlarmCubit>().setEnsayo(),
+                      child: Text(
+                        "Ensayo en ${_alarmRepo.timeOffset} segundos",
+                        textAlign: TextAlign.center,
+                      )),
                 ),
               ),
             ],
-          ),
-        ),
-        SizedBox(
-          height: 15,
-        ),
-        DropdownButton<String>(
-          value: alarm.radio,
-          icon: Icon(
-            Icons.radio,
-            color: Colors.green[800],
-          ),
-          iconSize: 24,
-          elevation: 16,
-          style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-              color: Colors.green[800]),
-          underline: Container(
-            height: 2,
-            color: Colors.greenAccent,
-          ),
-          onChanged: (String? newRadio) {
-            context.read<AlarmCubit>().setAlarmRadio(radio: newRadio!);
-          },
-          items: <String>[
-            'Futuro',
-            'BioBio',
-            'Adn',
-            'Rock&Pop',
-            "Cooperativa",
-            "Concierto"
-          ].map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: 80,
-                width: 150,
-                child: ElevatedButton(
-                    onPressed: () => context.read<AlarmCubit>().setAlarm(),
-                    child: Text("Set Alarm!")),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: 80,
-                width: 150,
-                child: ElevatedButton(
-                    onPressed: () => context.read<AlarmCubit>().setEnsayo(),
-                    child: Text(
-                      "Ensayo en ${_alarmRepo.timeOffset} segundos",
-                      textAlign: TextAlign.center,
-                    )),
-              ),
-            ),
-          ],
-        )
-      ],
+          )
+        ],
+      ),
     );
   }
 
@@ -268,43 +274,90 @@ class AlarmOffsetDial extends StatelessWidget {
     );
   }
 
-  Widget buildAlarmSet(BuildContext context) {
+  Widget buildAlarmSet(
+      BuildContext context, Alarm alarm, int offset, bool orchestratorState) {
+    // int _alarmRepo = getIt<LocalDatabase>().getAlarmOffset();
+    String alarmOffsetString = offset == 0
+        ? "Just at Sunrise"
+        : offset < 0
+            ? "${offset}min before Sunrise"
+            : "${offset}min after Sunrise";
+
     return Container(
-      child: Column(
-        children: [
-          SizedBox(
-            height: 50,
-          ),
-          Text("Alarm On"),
-          SizedBox(
-            height: 50,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              height: 100,
-              width: 200,
-              child: ElevatedButton(
-                onPressed: () => context.read<AlarmCubit>().checkAlarm(),
-                child: Text("Set New Alarm"),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            // SizedBox(
+            //   height: 20,
+            // ),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              // height: 40,
+              color: Colors.green[600],
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Alarm On!",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    AppIconWidget(image: "assets/paltarelax.png", imageSize: 70)
+                  ],
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
+            // SizedBox(
+            //   height: 20,
+            // ),
+            Divider(),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Column(
+                  children: [
+                    Text("Next Alarm:"),
+                    Text(getTimeString(alarm.alarmTime != null
+                        ? alarm.alarmTime!
+                        : DateTime.now())),
+                    Text(alarmOffsetString),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text("Auto-mode"),
+                    Switch(
+                      value: orchestratorState,
+                      onChanged: (_) =>
+                          context.read<AlarmCubit>().switchOrchestratorStatus(),
+                      activeTrackColor: Colors.green[300],
+                      activeColor: Colors.green[800],
+                    ),
+                  ],
+                )
+              ],
+            ),
+            Divider(),
+            SizedBox(
+              height: 20,
+            ),
+            Container(
               height: 80,
               width: 150,
               child: ElevatedButton(
                 onPressed: () => context.read<AlarmCubit>().cancelAlarms(),
                 child: Text(
-                  "Cancel Alarms",
+                  "Cancel Alarm",
                   textAlign: TextAlign.center,
                 ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -320,7 +373,7 @@ class AlarmOffsetDial extends StatelessWidget {
           height: 100,
           width: 200,
           child: ElevatedButton(
-            onPressed: () => context.read<AlarmCubit>().checkAlarm(),
+            onPressed: () => context.read<AlarmCubit>().getCurrentAlarmStatus(),
             child: Text("Set New Alarm"),
           ),
         )

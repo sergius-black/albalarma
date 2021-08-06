@@ -99,18 +99,11 @@ class AlarmRepository {
 
     DateTime currentAlarmTime = await getIt<LocalDatabase>().getAlarmTime();
 
-    String currentLocation =
-        await getIt<LocalDatabase>().getCurrentLocationName();
-
     SunTimes todaySunTimes = await getIt<LocalDatabase>().getTodaySuntimes();
 
     SunTimes tomorrowSunTimes =
         await getIt<LocalDatabase>().getTomorrowSuntimes();
 
-    DateTime newAlarmThreshold = currentAlarmTime.add(Duration(hours: 2));
-
-    bool isNightBefore = now.isBefore(todaySunTimes.sunrise);
-// "2012-02-27 13:27:00"
     bool isAfter8PM = now.isAfter(DateTime.parse(
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} 20:00:00"));
 
@@ -130,27 +123,19 @@ class AlarmRepository {
     bool isAlarmSetTime = isAfter8PM || now.isBefore(todaySunTimes.sunrise);
 
     bool alarmSetForToday = currentAlarmTime.isAfter(now);
-    print("orchestrator");
-    print(getTimeString(currentAlarmTime));
-    print(getTimeString(now));
-    print("is wake time $isWakeUpTime");
+
     // lazy weekends with no alarm
     if (isWeekend && weekendNoAlarm) {
-      print("orchestrator: weekend");
       _showAlarmTimeNotification("no alarm weekend");
       return;
     }
     // albalarma idle times. During the day
     if (isAlarmIdleTime) {
-      print("orchestrator: idle");
-
       _showAlarmTimeNotification("idle");
       return;
     }
     // between alarm time and 1 hour after it
     if (isWakeUpTime) {
-      print("orchestrator: wake up time");
-
       _showAlarmTimeNotification("wake up time");
       return;
     }
@@ -158,8 +143,6 @@ class AlarmRepository {
     // after midnight and no alarm was set
 
     if (isAlarmSetTime && !alarmSetForToday) {
-      print("orchestrator: set alarm");
-
       DateTime nextSunrise = now.isBefore(todaySunTimes.sunrise)
           ? todaySunTimes.sunrise
           : tomorrowSunTimes.sunrise;
@@ -169,7 +152,6 @@ class AlarmRepository {
 
       return;
     }
-    print("orchestrator: alarm on");
 
     _showAlarmTimeNotification();
   }
@@ -349,6 +331,13 @@ class AlarmRepository {
     print("cancelled alarms $orchestratorId and $alarmId");
 
     return (cancelOrchestrator && cancelAlarm);
+  }
+
+  Future<bool> cancelOrchestrator() async {
+    int orchestratorId = await getIt<LocalDatabase>().getOrchestratorId();
+    bool cancelOrchestrator = await AndroidAlarmManager.cancel(orchestratorId);
+    print("cancelled orchestrator");
+    return (cancelOrchestrator);
   }
 
   String getTimeString(DateTime date) {

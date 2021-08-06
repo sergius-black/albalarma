@@ -51,12 +51,7 @@ class LocationRepository implements ILocationRepository {
 
     try {
       PositionName _positionName = await determinePosition();
-      print(_positionName);
       DateTime today = DateTime.now();
-      // List<Placemark> _placemarks = await placemarkFromCoordinates(
-      //     _position.latitude, _position.longitude);
-
-      print(_positionName.name);
 
       List<SunTimes> suntimes = [];
 
@@ -65,12 +60,8 @@ class LocationRepository implements ILocationRepository {
 
         final sunTimesFromLocalDB =
             _db.getDateSunTimes(requestDay, _positionName.name);
-        // if (sunTimesFromLocalDB != null) {
-        //   print("local suntimes");
-        //   print(sunTimesFromLocalDB);
-        // }
+
         if (sunTimesFromLocalDB == null) {
-          // print("Requesting suntimes for $dateAndLocation");
           SunTimes sunTimesFromRemoteAPI = await _api.getSunTimesFromAPI(
             latitude: _positionName.position.latitude.toString(),
             longitude: _positionName.position.longitude.toString(),

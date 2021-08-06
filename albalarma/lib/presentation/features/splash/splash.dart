@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:albalarma/presentation/features/splash/splash_icon.dart';
+import 'package:albalarma/presentation/common/app_icon.dart';
 import 'package:albalarma/presentation/routes/router.gr.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +19,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+
     return Material(
-      child: Center(child: AppIconWidget(image: "assets/paltabigote.png")),
+      child: Center(child: AppIconWidget(imageSize: size.width * 0.7)),
     );
   }
 

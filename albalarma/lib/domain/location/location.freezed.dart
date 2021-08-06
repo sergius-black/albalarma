@@ -17,10 +17,10 @@ class _$LocationTearOff {
   const _$LocationTearOff();
 
   _Location call(
-      {required String name,
-      required double latitude,
-      required double longitude,
-      List<SunTimes>? sunTimes}) {
+      {@HiveField(0) required String name,
+      @HiveField(1) required double latitude,
+      @HiveField(2) required double longitude,
+      @HiveField(3) List<SunTimes>? sunTimes}) {
     return _Location(
       name: name,
       latitude: latitude,
@@ -35,9 +35,13 @@ const $Location = _$LocationTearOff();
 
 /// @nodoc
 mixin _$Location {
+  @HiveField(0)
   String get name => throw _privateConstructorUsedError;
+  @HiveField(1)
   double get latitude => throw _privateConstructorUsedError;
+  @HiveField(2)
   double get longitude => throw _privateConstructorUsedError;
+  @HiveField(3)
   List<SunTimes>? get sunTimes => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -50,10 +54,10 @@ abstract class $LocationCopyWith<$Res> {
   factory $LocationCopyWith(Location value, $Res Function(Location) then) =
       _$LocationCopyWithImpl<$Res>;
   $Res call(
-      {String name,
-      double latitude,
-      double longitude,
-      List<SunTimes>? sunTimes});
+      {@HiveField(0) String name,
+      @HiveField(1) double latitude,
+      @HiveField(2) double longitude,
+      @HiveField(3) List<SunTimes>? sunTimes});
 }
 
 /// @nodoc
@@ -98,10 +102,10 @@ abstract class _$LocationCopyWith<$Res> implements $LocationCopyWith<$Res> {
       __$LocationCopyWithImpl<$Res>;
   @override
   $Res call(
-      {String name,
-      double latitude,
-      double longitude,
-      List<SunTimes>? sunTimes});
+      {@HiveField(0) String name,
+      @HiveField(1) double latitude,
+      @HiveField(2) double longitude,
+      @HiveField(3) List<SunTimes>? sunTimes});
 }
 
 /// @nodoc
@@ -143,20 +147,25 @@ class __$LocationCopyWithImpl<$Res> extends _$LocationCopyWithImpl<$Res>
 
 /// @nodoc
 
+@HiveType(typeId: 1, adapterName: "LocationAdapter")
 class _$_Location implements _Location {
   const _$_Location(
-      {required this.name,
-      required this.latitude,
-      required this.longitude,
-      this.sunTimes});
+      {@HiveField(0) required this.name,
+      @HiveField(1) required this.latitude,
+      @HiveField(2) required this.longitude,
+      @HiveField(3) this.sunTimes});
 
   @override
+  @HiveField(0)
   final String name;
   @override
+  @HiveField(1)
   final double latitude;
   @override
+  @HiveField(2)
   final double longitude;
   @override
+  @HiveField(3)
   final List<SunTimes>? sunTimes;
 
   @override
@@ -197,18 +206,22 @@ class _$_Location implements _Location {
 
 abstract class _Location implements Location {
   const factory _Location(
-      {required String name,
-      required double latitude,
-      required double longitude,
-      List<SunTimes>? sunTimes}) = _$_Location;
+      {@HiveField(0) required String name,
+      @HiveField(1) required double latitude,
+      @HiveField(2) required double longitude,
+      @HiveField(3) List<SunTimes>? sunTimes}) = _$_Location;
 
   @override
+  @HiveField(0)
   String get name => throw _privateConstructorUsedError;
   @override
+  @HiveField(1)
   double get latitude => throw _privateConstructorUsedError;
   @override
+  @HiveField(2)
   double get longitude => throw _privateConstructorUsedError;
   @override
+  @HiveField(3)
   List<SunTimes>? get sunTimes => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)

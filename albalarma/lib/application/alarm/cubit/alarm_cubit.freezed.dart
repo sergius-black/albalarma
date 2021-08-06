@@ -20,9 +20,10 @@ class _$AlarmStateTearOff {
     return const AlarmInitial();
   }
 
-  Off off(Alarm alarm) {
+  Off off(Alarm alarm, int initialOffset) {
     return Off(
       alarm,
+      initialOffset,
     );
   }
 
@@ -30,9 +31,11 @@ class _$AlarmStateTearOff {
     return const SettingAlarm();
   }
 
-  AlarmSet setted(Alarm alarm) {
+  AlarmSet setted(Alarm alarm, int offset, bool orchestratorState) {
     return AlarmSet(
       alarm,
+      offset,
+      orchestratorState,
     );
   }
 
@@ -49,18 +52,19 @@ mixin _$AlarmState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
-    required TResult Function(Alarm alarm) off,
+    required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm) setted,
+    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+        setted,
     required TResult Function() error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
-    TResult Function(Alarm alarm)? off,
+    TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm)? setted,
+    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
     TResult Function()? error,
     required TResult orElse(),
   }) =>
@@ -142,9 +146,10 @@ class _$AlarmInitial implements AlarmInitial {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
-    required TResult Function(Alarm alarm) off,
+    required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm) setted,
+    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+        setted,
     required TResult Function() error,
   }) {
     return initial();
@@ -154,9 +159,9 @@ class _$AlarmInitial implements AlarmInitial {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
-    TResult Function(Alarm alarm)? off,
+    TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm)? setted,
+    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
     TResult Function()? error,
     required TResult orElse(),
   }) {
@@ -203,7 +208,7 @@ abstract class AlarmInitial implements AlarmState {
 abstract class $OffCopyWith<$Res> {
   factory $OffCopyWith(Off value, $Res Function(Off) then) =
       _$OffCopyWithImpl<$Res>;
-  $Res call({Alarm alarm});
+  $Res call({Alarm alarm, int initialOffset});
 
   $AlarmCopyWith<$Res> get alarm;
 }
@@ -220,12 +225,17 @@ class _$OffCopyWithImpl<$Res> extends _$AlarmStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object? alarm = freezed,
+    Object? initialOffset = freezed,
   }) {
     return _then(Off(
       alarm == freezed
           ? _value.alarm
           : alarm // ignore: cast_nullable_to_non_nullable
               as Alarm,
+      initialOffset == freezed
+          ? _value.initialOffset
+          : initialOffset // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 
@@ -240,14 +250,16 @@ class _$OffCopyWithImpl<$Res> extends _$AlarmStateCopyWithImpl<$Res>
 /// @nodoc
 
 class _$Off implements Off {
-  const _$Off(this.alarm);
+  const _$Off(this.alarm, this.initialOffset);
 
   @override
   final Alarm alarm;
+  @override
+  final int initialOffset;
 
   @override
   String toString() {
-    return 'AlarmState.off(alarm: $alarm)';
+    return 'AlarmState.off(alarm: $alarm, initialOffset: $initialOffset)';
   }
 
   @override
@@ -255,12 +267,17 @@ class _$Off implements Off {
     return identical(this, other) ||
         (other is Off &&
             (identical(other.alarm, alarm) ||
-                const DeepCollectionEquality().equals(other.alarm, alarm)));
+                const DeepCollectionEquality().equals(other.alarm, alarm)) &&
+            (identical(other.initialOffset, initialOffset) ||
+                const DeepCollectionEquality()
+                    .equals(other.initialOffset, initialOffset)));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(alarm);
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(alarm) ^
+      const DeepCollectionEquality().hash(initialOffset);
 
   @JsonKey(ignore: true)
   @override
@@ -270,26 +287,27 @@ class _$Off implements Off {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
-    required TResult Function(Alarm alarm) off,
+    required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm) setted,
+    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+        setted,
     required TResult Function() error,
   }) {
-    return off(alarm);
+    return off(alarm, initialOffset);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
-    TResult Function(Alarm alarm)? off,
+    TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm)? setted,
+    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
     TResult Function()? error,
     required TResult orElse(),
   }) {
     if (off != null) {
-      return off(alarm);
+      return off(alarm, initialOffset);
     }
     return orElse();
   }
@@ -324,9 +342,10 @@ class _$Off implements Off {
 }
 
 abstract class Off implements AlarmState {
-  const factory Off(Alarm alarm) = _$Off;
+  const factory Off(Alarm alarm, int initialOffset) = _$Off;
 
   Alarm get alarm => throw _privateConstructorUsedError;
+  int get initialOffset => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $OffCopyWith<Off> get copyWith => throw _privateConstructorUsedError;
 }
@@ -371,9 +390,10 @@ class _$SettingAlarm implements SettingAlarm {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
-    required TResult Function(Alarm alarm) off,
+    required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm) setted,
+    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+        setted,
     required TResult Function() error,
   }) {
     return setting();
@@ -383,9 +403,9 @@ class _$SettingAlarm implements SettingAlarm {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
-    TResult Function(Alarm alarm)? off,
+    TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm)? setted,
+    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
     TResult Function()? error,
     required TResult orElse(),
   }) {
@@ -432,7 +452,7 @@ abstract class SettingAlarm implements AlarmState {
 abstract class $AlarmSetCopyWith<$Res> {
   factory $AlarmSetCopyWith(AlarmSet value, $Res Function(AlarmSet) then) =
       _$AlarmSetCopyWithImpl<$Res>;
-  $Res call({Alarm alarm});
+  $Res call({Alarm alarm, int offset, bool orchestratorState});
 
   $AlarmCopyWith<$Res> get alarm;
 }
@@ -449,12 +469,22 @@ class _$AlarmSetCopyWithImpl<$Res> extends _$AlarmStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object? alarm = freezed,
+    Object? offset = freezed,
+    Object? orchestratorState = freezed,
   }) {
     return _then(AlarmSet(
       alarm == freezed
           ? _value.alarm
           : alarm // ignore: cast_nullable_to_non_nullable
               as Alarm,
+      offset == freezed
+          ? _value.offset
+          : offset // ignore: cast_nullable_to_non_nullable
+              as int,
+      orchestratorState == freezed
+          ? _value.orchestratorState
+          : orchestratorState // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 
@@ -469,14 +499,18 @@ class _$AlarmSetCopyWithImpl<$Res> extends _$AlarmStateCopyWithImpl<$Res>
 /// @nodoc
 
 class _$AlarmSet implements AlarmSet {
-  const _$AlarmSet(this.alarm);
+  const _$AlarmSet(this.alarm, this.offset, this.orchestratorState);
 
   @override
   final Alarm alarm;
+  @override
+  final int offset;
+  @override
+  final bool orchestratorState;
 
   @override
   String toString() {
-    return 'AlarmState.setted(alarm: $alarm)';
+    return 'AlarmState.setted(alarm: $alarm, offset: $offset, orchestratorState: $orchestratorState)';
   }
 
   @override
@@ -484,12 +518,20 @@ class _$AlarmSet implements AlarmSet {
     return identical(this, other) ||
         (other is AlarmSet &&
             (identical(other.alarm, alarm) ||
-                const DeepCollectionEquality().equals(other.alarm, alarm)));
+                const DeepCollectionEquality().equals(other.alarm, alarm)) &&
+            (identical(other.offset, offset) ||
+                const DeepCollectionEquality().equals(other.offset, offset)) &&
+            (identical(other.orchestratorState, orchestratorState) ||
+                const DeepCollectionEquality()
+                    .equals(other.orchestratorState, orchestratorState)));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(alarm);
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(alarm) ^
+      const DeepCollectionEquality().hash(offset) ^
+      const DeepCollectionEquality().hash(orchestratorState);
 
   @JsonKey(ignore: true)
   @override
@@ -500,26 +542,27 @@ class _$AlarmSet implements AlarmSet {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
-    required TResult Function(Alarm alarm) off,
+    required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm) setted,
+    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+        setted,
     required TResult Function() error,
   }) {
-    return setted(alarm);
+    return setted(alarm, offset, orchestratorState);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
-    TResult Function(Alarm alarm)? off,
+    TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm)? setted,
+    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
     TResult Function()? error,
     required TResult orElse(),
   }) {
     if (setted != null) {
-      return setted(alarm);
+      return setted(alarm, offset, orchestratorState);
     }
     return orElse();
   }
@@ -554,9 +597,12 @@ class _$AlarmSet implements AlarmSet {
 }
 
 abstract class AlarmSet implements AlarmState {
-  const factory AlarmSet(Alarm alarm) = _$AlarmSet;
+  const factory AlarmSet(Alarm alarm, int offset, bool orchestratorState) =
+      _$AlarmSet;
 
   Alarm get alarm => throw _privateConstructorUsedError;
+  int get offset => throw _privateConstructorUsedError;
+  bool get orchestratorState => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $AlarmSetCopyWith<AlarmSet> get copyWith =>
       throw _privateConstructorUsedError;
@@ -601,9 +647,10 @@ class _$AlarmError implements AlarmError {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
-    required TResult Function(Alarm alarm) off,
+    required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm) setted,
+    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+        setted,
     required TResult Function() error,
   }) {
     return error();
@@ -613,9 +660,9 @@ class _$AlarmError implements AlarmError {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
-    TResult Function(Alarm alarm)? off,
+    TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm)? setted,
+    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
     TResult Function()? error,
     required TResult orElse(),
   }) {

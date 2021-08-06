@@ -16,7 +16,9 @@ final _privateConstructorUsedError = UnsupportedError(
 class _$AlarmTearOff {
   const _$AlarmTearOff();
 
-  _Alarm call({required DateTime alarmTime, required String radio}) {
+  _Alarm call(
+      {@HiveField(0) required DateTime? alarmTime,
+      @HiveField(1) required String radio}) {
     return _Alarm(
       alarmTime: alarmTime,
       radio: radio,
@@ -29,7 +31,9 @@ const $Alarm = _$AlarmTearOff();
 
 /// @nodoc
 mixin _$Alarm {
-  DateTime get alarmTime => throw _privateConstructorUsedError;
+  @HiveField(0)
+  DateTime? get alarmTime => throw _privateConstructorUsedError;
+  @HiveField(1)
   String get radio => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -40,7 +44,7 @@ mixin _$Alarm {
 abstract class $AlarmCopyWith<$Res> {
   factory $AlarmCopyWith(Alarm value, $Res Function(Alarm) then) =
       _$AlarmCopyWithImpl<$Res>;
-  $Res call({DateTime alarmTime, String radio});
+  $Res call({@HiveField(0) DateTime? alarmTime, @HiveField(1) String radio});
 }
 
 /// @nodoc
@@ -60,7 +64,7 @@ class _$AlarmCopyWithImpl<$Res> implements $AlarmCopyWith<$Res> {
       alarmTime: alarmTime == freezed
           ? _value.alarmTime
           : alarmTime // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
       radio: radio == freezed
           ? _value.radio
           : radio // ignore: cast_nullable_to_non_nullable
@@ -74,7 +78,7 @@ abstract class _$AlarmCopyWith<$Res> implements $AlarmCopyWith<$Res> {
   factory _$AlarmCopyWith(_Alarm value, $Res Function(_Alarm) then) =
       __$AlarmCopyWithImpl<$Res>;
   @override
-  $Res call({DateTime alarmTime, String radio});
+  $Res call({@HiveField(0) DateTime? alarmTime, @HiveField(1) String radio});
 }
 
 /// @nodoc
@@ -95,7 +99,7 @@ class __$AlarmCopyWithImpl<$Res> extends _$AlarmCopyWithImpl<$Res>
       alarmTime: alarmTime == freezed
           ? _value.alarmTime
           : alarmTime // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
       radio: radio == freezed
           ? _value.radio
           : radio // ignore: cast_nullable_to_non_nullable
@@ -106,12 +110,17 @@ class __$AlarmCopyWithImpl<$Res> extends _$AlarmCopyWithImpl<$Res>
 
 /// @nodoc
 
+@HiveType(typeId: 2, adapterName: "AlarmAdapter")
 class _$_Alarm implements _Alarm {
-  const _$_Alarm({required this.alarmTime, required this.radio});
+  const _$_Alarm(
+      {@HiveField(0) required this.alarmTime,
+      @HiveField(1) required this.radio});
 
   @override
-  final DateTime alarmTime;
+  @HiveField(0)
+  final DateTime? alarmTime;
   @override
+  @HiveField(1)
   final String radio;
 
   @override
@@ -143,12 +152,15 @@ class _$_Alarm implements _Alarm {
 }
 
 abstract class _Alarm implements Alarm {
-  const factory _Alarm({required DateTime alarmTime, required String radio}) =
-      _$_Alarm;
+  const factory _Alarm(
+      {@HiveField(0) required DateTime? alarmTime,
+      @HiveField(1) required String radio}) = _$_Alarm;
 
   @override
-  DateTime get alarmTime => throw _privateConstructorUsedError;
+  @HiveField(0)
+  DateTime? get alarmTime => throw _privateConstructorUsedError;
   @override
+  @HiveField(1)
   String get radio => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)

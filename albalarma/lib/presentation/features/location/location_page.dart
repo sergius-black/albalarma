@@ -1,5 +1,6 @@
 import 'package:albalarma/application/location/location_cubit.dart';
 import 'package:albalarma/domain/location/location.dart';
+import 'package:albalarma/presentation/common/app_icon.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -25,28 +26,37 @@ class _LocationPageState extends State<LocationPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => LocationCubit(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("Choose Location"),
-        ),
-        body: Container(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          alignment: Alignment.center,
-          child: BlocBuilder<LocationCubit, LocationState>(
-            builder: (context, state) {
-              if (state is LocationInitial) {
-                return buildInitial(
-                  context,
-                );
-              } else if (state is RequestingLocation) {
-                return buildRequesting();
-              } else if (state is LocationLoaded) {
-                return buildLoaded(context, state.location);
-              } else {
-                // (state is WeatherError)
-                return buildError();
-              }
-            },
+      child: SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Text("Choose Location"),
+                Spacer(),
+                AppIconWidget(imageSize: 30)
+              ],
+            ),
+          ),
+          body: Container(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            alignment: Alignment.center,
+            child: BlocBuilder<LocationCubit, LocationState>(
+              builder: (context, state) {
+                if (state is LocationInitial) {
+                  return buildInitial(
+                    context,
+                  );
+                } else if (state is RequestingLocation) {
+                  return buildRequesting();
+                } else if (state is LocationLoaded) {
+                  return buildLoaded(context, state.location);
+                } else {
+                  // (state is WeatherError)
+                  return buildError();
+                }
+              },
+            ),
           ),
         ),
       ),
@@ -121,6 +131,7 @@ class _LocationPageState extends State<LocationPage> {
             children: [
               Text(location.name),
               DataTable(
+                columnSpacing: 30,
                 columns: const <DataColumn>[
                   DataColumn(
                     label: Text(

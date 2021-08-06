@@ -1,3 +1,5 @@
+import 'package:albalarma/domain/alarm/alarm.dart';
+import 'package:albalarma/domain/location/location.dart';
 import 'package:albalarma/domain/location/sun_times.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -7,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 @Singleton()
 class LocalDatabase {
   late Box _sunTimesBox;
+  late Box _locationBox;
+  late Box _alarmBox;
   late SharedPreferences _sharedPreferences;
 
   //Constructor
@@ -14,13 +18,33 @@ class LocalDatabase {
   LocalDatabase() {
     Hive.initFlutter().then((_) {
       Hive.registerAdapter(SunTimesAdapter());
+      Hive.registerAdapter(LocationAdapter());
+      Hive.registerAdapter(AlarmAdapter());
       Hive.openBox<SunTimes>('suntimes').then((box) => _sunTimesBox = box);
+      Hive.openBox<Location>('location').then((box) => _locationBox = box);
+      Hive.openBox<Alarm>('alarm').then((box) => _alarmBox = box);
     });
 
     SharedPreferences.getInstance().then((prefs) => _sharedPreferences = prefs);
   }
 
   //Hive Methods
+
+  Future<void> saveLocation(Location location) {
+    return _locationBox.put("lastLocation", location);
+  }
+
+  Location? getLastLocation() {
+    return _locationBox.get("lastLocation");
+  }
+
+  Future<void> saveAlarm(Alarm alarm) {
+    return _alarmBox.put("currentAlarm", alarm);
+  }
+
+  Alarm? getCurrentAlarm() {
+    return _alarmBox.get("currentAlarm");
+  }
 
   SunTimes? getDateSunTimes(DateTime date, String locality) {
     final String dateAndLocation =
@@ -63,12 +87,12 @@ class LocalDatabase {
 
 // Shared Preferences Methods
 
-  Future<bool> setAlbalarmaStatus(bool onOrOff) async {
-    return await _sharedPreferences.setBool("albalarmaStatus", onOrOff);
+  Future<bool> setOrchestratorStatus(bool onOrOff) async {
+    return await _sharedPreferences.setBool("orchestratorStatus", onOrOff);
   }
 
-  Future<bool> getAlbalarmaStatus() async {
-    return _sharedPreferences.getBool("albalarmaStatus") ?? false;
+  Future<bool> getOrchestratorStatus() async {
+    return _sharedPreferences.getBool("orchestratorStatus") ?? false;
   }
 
   Future<bool> setAlarmTimeString(String timeString) async {
