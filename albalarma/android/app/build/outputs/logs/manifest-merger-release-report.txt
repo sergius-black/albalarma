@@ -61,7 +61,7 @@ INJECTED from /home/batman/code/Albalarma/albalarma/android/app/src/main/Android
 INJECTED from /home/batman/code/Albalarma/albalarma/android/app/src/main/AndroidManifest.xml:1:1-90:12
 INJECTED from /home/batman/code/Albalarma/albalarma/android/app/src/main/AndroidManifest.xml:1:1-90:12
 	package
-		ADDED from /home/batman/code/Albalarma/albalarma/android/app/src/main/AndroidManifest.xml:2:5-35
+		ADDED from /home/batman/code/Albalarma/albalarma/android/app/src/main/AndroidManifest.xml:2:5-36
 		INJECTED from /home/batman/code/Albalarma/albalarma/android/app/src/main/AndroidManifest.xml
 		INJECTED from /home/batman/code/Albalarma/albalarma/android/app/src/main/AndroidManifest.xml
 	android:versionName

@@ -73,6 +73,15 @@ class LocalDatabase {
     return _sunTimesBox.get(dateAndLocation);
   }
 
+  Future<DateTime> nextSunrise() async {
+    SunTimes todaySunTimes = await getTodaySuntimes();
+    SunTimes tomorrowSunTimes = await getTomorrowSuntimes();
+
+    return DateTime.now().isBefore(todaySunTimes.sunrise)
+        ? todaySunTimes.sunrise
+        : tomorrowSunTimes.sunrise;
+  }
+
   Future<void> addDateSunTimes(
       DateTime date, String locationName, SunTimes sunTimes) async {
     final String dateAndLocation =
@@ -114,6 +123,14 @@ class LocalDatabase {
     return _sharedPreferences.getInt("alarmId") ?? 0;
   }
 
+  Future<bool> setAlarmStatus(bool alarmStatus) async {
+    return await _sharedPreferences.setBool("alarmStatus", alarmStatus);
+  }
+
+  Future<bool> getAlarmStatus() async {
+    return _sharedPreferences.getBool("alarmStatus") ?? false;
+  }
+
   Future<bool> setOrchestratorId(int orchestratorId) async {
     return await _sharedPreferences.setInt("orchestratorId", orchestratorId);
   }
@@ -140,12 +157,12 @@ class LocalDatabase {
     return _sharedPreferences.getString("currentLocation") ?? "ERROOROROOROROR";
   }
 
-  Future<bool> setWeekendNoAlarm(bool weekend) async {
-    return await _sharedPreferences.setBool("weekend", weekend);
+  Future<bool> setLazyWeekend(bool lazy) async {
+    return await _sharedPreferences.setBool("lazyWeekend", lazy);
   }
 
-  Future<bool> getWeekendNoAlarm() async {
-    return _sharedPreferences.getBool("weekend") ?? false;
+  Future<bool> getLazyWeekend() async {
+    return _sharedPreferences.getBool("lazyWeekend") ?? true;
   }
 
   Future<bool> setAlarmOffset(int offset) async {

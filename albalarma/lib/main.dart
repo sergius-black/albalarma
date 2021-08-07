@@ -44,7 +44,7 @@ class _MyAppState extends State<MyApp> {
               accentColor: Colors.green[300],
               elevatedButtonTheme: ElevatedButtonThemeData(
                 style: ElevatedButton.styleFrom(
-                    primary: Colors.green[600],
+                    primary: Colors.green[700],
                     textStyle:
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),

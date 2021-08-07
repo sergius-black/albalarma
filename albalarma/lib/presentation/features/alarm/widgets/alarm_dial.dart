@@ -7,14 +7,20 @@ import 'package:albalarma/presentation/common/app_icon.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class AlarmOffsetDial extends StatelessWidget {
+class AlarmOffsetDial extends StatefulWidget {
   final DateTime sunrise;
 
   AlarmOffsetDial({
     required this.sunrise,
   });
 
+  @override
+  _AlarmOffsetDialState createState() => _AlarmOffsetDialState();
+}
+
+class _AlarmOffsetDialState extends State<AlarmOffsetDial> {
   final List<Widget> options = [
     Text("-60"),
     Text("-55"),
@@ -43,6 +49,8 @@ class AlarmOffsetDial extends StatelessWidget {
     Text("+60"),
   ];
 
+  bool test = false;
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AlarmCubit, AlarmState>(
@@ -56,8 +64,8 @@ class AlarmOffsetDial extends StatelessWidget {
         } else if (state is SettingAlarm) {
           return buildSettingAlarm();
         } else if (state is AlarmSet) {
-          return buildAlarmSet(
-              context, state.alarm, state.offset, state.orchestratorState);
+          return buildAlarmSet(context, state.alarm, state.offset,
+              state.orchestratorState, state.lazyWeekend);
         } else {
           return buildAlarmError(context);
         }
@@ -93,8 +101,8 @@ class AlarmOffsetDial extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("Nexts Sunrise:"),
-                  Text(getTimeString(sunrise)),
+                  Text("Next Sunrise:"),
+                  Text(getTimeString(widget.sunrise)),
                   SizedBox(
                     height: 5,
                   ),
@@ -108,8 +116,9 @@ class AlarmOffsetDial extends StatelessWidget {
                       height: 100,
                       width: 200,
                       child: ElevatedButton(
-                        onPressed: () =>
-                            context.read<AlarmCubit>().setSunriseTime(sunrise),
+                        onPressed: () => context
+                            .read<AlarmCubit>()
+                            .setSunriseTime(widget.sunrise),
                         child: Text("Add Alarm"),
                       ),
                     ),
@@ -158,7 +167,7 @@ class AlarmOffsetDial extends StatelessWidget {
                   child: Column(
                     children: [
                       Text("Tomorrow's Sunrise:"),
-                      Text(getTimeString(sunrise)),
+                      Text(getTimeString(widget.sunrise)),
                       Divider(),
                       Text("Alarm Time:"),
                       Text(alarmSetString),
@@ -190,70 +199,78 @@ class AlarmOffsetDial extends StatelessWidget {
           SizedBox(
             height: 15,
           ),
-          DropdownButton<String>(
-            value: alarm.radio,
-            icon: Icon(
-              Icons.radio,
-              color: Colors.green[800],
-            ),
-            iconSize: 24,
-            elevation: 16,
-            style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-                color: Colors.green[800]),
-            underline: Container(
-              height: 2,
-              color: Colors.greenAccent,
-            ),
-            onChanged: (String? newRadio) {
-              context.read<AlarmCubit>().setAlarmRadio(radio: newRadio!);
-            },
-            items: <String>[
-              'Futuro',
-              'BioBio',
-              'Adn',
-              'Rock&Pop',
-              "Cooperativa",
-              "Concierto"
-            ].map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-          ),
-          SizedBox(
-            height: 20,
-          ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            // mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 80,
-                  width: 150,
-                  child: ElevatedButton(
-                      onPressed: () => context.read<AlarmCubit>().setAlarm(),
-                      child: Text("Set Alarm!")),
+              DropdownButton<String>(
+                value: alarm.radio,
+                icon: Icon(
+                  Icons.radio,
+                  color: Colors.green[800],
                 ),
+                iconSize: 24,
+                elevation: 16,
+                style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green[800]),
+                underline: Container(
+                  height: 2,
+                  color: Colors.greenAccent,
+                ),
+                onChanged: (String? newRadio) {
+                  context.read<AlarmCubit>().setAlarmRadio(radio: newRadio!);
+                },
+                items: <String>[
+                  'Futuro',
+                  'BioBio',
+                  'Adn',
+                  'Rock&Pop',
+                  "Cooperativa",
+                  "Concierto"
+                ].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 80,
-                  width: 150,
-                  child: ElevatedButton(
+              Column(
+                children: [
+                  Text("Test"),
+                  Checkbox(
+                    checkColor: Colors.white,
+                    fillColor: MaterialStateProperty.all(Colors.green[700]),
+                    value: test,
+                    onChanged: (_) {
+                      setState(() {
+                        test = !test;
+                      });
+                    },
+                  )
+                ],
+              )
+            ],
+          ),
+          Divider(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              height: 80,
+              width: 150,
+              child: test
+                  ? ElevatedButton(
                       onPressed: () => context.read<AlarmCubit>().setEnsayo(),
                       child: Text(
-                        "Ensayo en ${_alarmRepo.timeOffset} segundos",
+                        "Ensayo en $timeOffset segundos",
                         textAlign: TextAlign.center,
-                      )),
-                ),
-              ),
-            ],
-          )
+                      ))
+                  : ElevatedButton(
+                      onPressed: () => context.read<AlarmCubit>().setAlarm(),
+                      child: Text("Set Alarm!")),
+            ),
+          ),
         ],
       ),
     );
@@ -274,14 +291,17 @@ class AlarmOffsetDial extends StatelessWidget {
     );
   }
 
-  Widget buildAlarmSet(
-      BuildContext context, Alarm alarm, int offset, bool orchestratorState) {
-    // int _alarmRepo = getIt<LocalDatabase>().getAlarmOffset();
-    String alarmOffsetString = offset == 0
-        ? "Just at Sunrise"
-        : offset < 0
-            ? "${offset}min before Sunrise"
-            : "${offset}min after Sunrise";
+  Widget buildAlarmSet(BuildContext context, Alarm alarm, int offset,
+      bool orchestratorState, bool lazyWeekend) {
+    bool isWeekend = getIt<AlarmRepository>().isWeekend();
+
+    String alarmOffsetString = (lazyWeekend && isWeekend)
+        ? "Lazy Weekend!"
+        : offset == 0
+            ? "Just at Sunrise"
+            : offset < 0
+                ? "${offset}min before Sunrise"
+                : "${offset}min after Sunrise";
 
     return Container(
       child: SingleChildScrollView(
@@ -321,9 +341,9 @@ class AlarmOffsetDial extends StatelessWidget {
                 Column(
                   children: [
                     Text("Next Alarm:"),
-                    Text(getTimeString(alarm.alarmTime != null
-                        ? alarm.alarmTime!
-                        : DateTime.now())),
+                    Text((lazyWeekend && isWeekend)
+                        ? "Who cares?"
+                        : getTimeString(alarm.alarmTime!)),
                     Text(alarmOffsetString),
                   ],
                 ),
@@ -337,14 +357,20 @@ class AlarmOffsetDial extends StatelessWidget {
                       activeTrackColor: Colors.green[300],
                       activeColor: Colors.green[800],
                     ),
+                    Text("Weekends?"),
+                    Checkbox(
+                      checkColor: Colors.white,
+                      fillColor: MaterialStateProperty.all(Colors.green[700]),
+                      value: !lazyWeekend,
+                      onChanged: (_) {
+                        context.read<AlarmCubit>().switchLazyWeekendStatus();
+                      },
+                    )
                   ],
                 )
               ],
             ),
             Divider(),
-            SizedBox(
-              height: 20,
-            ),
             Container(
               height: 80,
               width: 150,

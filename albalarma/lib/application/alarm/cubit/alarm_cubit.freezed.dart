@@ -31,11 +31,13 @@ class _$AlarmStateTearOff {
     return const SettingAlarm();
   }
 
-  AlarmSet setted(Alarm alarm, int offset, bool orchestratorState) {
+  AlarmSet setted(
+      Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend) {
     return AlarmSet(
       alarm,
       offset,
       orchestratorState,
+      lazyWeekend,
     );
   }
 
@@ -54,7 +56,8 @@ mixin _$AlarmState {
     required TResult Function() initial,
     required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+    required TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)
         setted,
     required TResult Function() error,
   }) =>
@@ -64,7 +67,9 @@ mixin _$AlarmState {
     TResult Function()? initial,
     TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
+    TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)?
+        setted,
     TResult Function()? error,
     required TResult orElse(),
   }) =>
@@ -148,7 +153,8 @@ class _$AlarmInitial implements AlarmInitial {
     required TResult Function() initial,
     required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+    required TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)
         setted,
     required TResult Function() error,
   }) {
@@ -161,7 +167,9 @@ class _$AlarmInitial implements AlarmInitial {
     TResult Function()? initial,
     TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
+    TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)?
+        setted,
     TResult Function()? error,
     required TResult orElse(),
   }) {
@@ -289,7 +297,8 @@ class _$Off implements Off {
     required TResult Function() initial,
     required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+    required TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)
         setted,
     required TResult Function() error,
   }) {
@@ -302,7 +311,9 @@ class _$Off implements Off {
     TResult Function()? initial,
     TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
+    TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)?
+        setted,
     TResult Function()? error,
     required TResult orElse(),
   }) {
@@ -392,7 +403,8 @@ class _$SettingAlarm implements SettingAlarm {
     required TResult Function() initial,
     required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+    required TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)
         setted,
     required TResult Function() error,
   }) {
@@ -405,7 +417,9 @@ class _$SettingAlarm implements SettingAlarm {
     TResult Function()? initial,
     TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
+    TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)?
+        setted,
     TResult Function()? error,
     required TResult orElse(),
   }) {
@@ -452,7 +466,8 @@ abstract class SettingAlarm implements AlarmState {
 abstract class $AlarmSetCopyWith<$Res> {
   factory $AlarmSetCopyWith(AlarmSet value, $Res Function(AlarmSet) then) =
       _$AlarmSetCopyWithImpl<$Res>;
-  $Res call({Alarm alarm, int offset, bool orchestratorState});
+  $Res call(
+      {Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend});
 
   $AlarmCopyWith<$Res> get alarm;
 }
@@ -471,6 +486,7 @@ class _$AlarmSetCopyWithImpl<$Res> extends _$AlarmStateCopyWithImpl<$Res>
     Object? alarm = freezed,
     Object? offset = freezed,
     Object? orchestratorState = freezed,
+    Object? lazyWeekend = freezed,
   }) {
     return _then(AlarmSet(
       alarm == freezed
@@ -484,6 +500,10 @@ class _$AlarmSetCopyWithImpl<$Res> extends _$AlarmStateCopyWithImpl<$Res>
       orchestratorState == freezed
           ? _value.orchestratorState
           : orchestratorState // ignore: cast_nullable_to_non_nullable
+              as bool,
+      lazyWeekend == freezed
+          ? _value.lazyWeekend
+          : lazyWeekend // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }
@@ -499,7 +519,8 @@ class _$AlarmSetCopyWithImpl<$Res> extends _$AlarmStateCopyWithImpl<$Res>
 /// @nodoc
 
 class _$AlarmSet implements AlarmSet {
-  const _$AlarmSet(this.alarm, this.offset, this.orchestratorState);
+  const _$AlarmSet(
+      this.alarm, this.offset, this.orchestratorState, this.lazyWeekend);
 
   @override
   final Alarm alarm;
@@ -507,10 +528,12 @@ class _$AlarmSet implements AlarmSet {
   final int offset;
   @override
   final bool orchestratorState;
+  @override
+  final bool lazyWeekend;
 
   @override
   String toString() {
-    return 'AlarmState.setted(alarm: $alarm, offset: $offset, orchestratorState: $orchestratorState)';
+    return 'AlarmState.setted(alarm: $alarm, offset: $offset, orchestratorState: $orchestratorState, lazyWeekend: $lazyWeekend)';
   }
 
   @override
@@ -523,7 +546,10 @@ class _$AlarmSet implements AlarmSet {
                 const DeepCollectionEquality().equals(other.offset, offset)) &&
             (identical(other.orchestratorState, orchestratorState) ||
                 const DeepCollectionEquality()
-                    .equals(other.orchestratorState, orchestratorState)));
+                    .equals(other.orchestratorState, orchestratorState)) &&
+            (identical(other.lazyWeekend, lazyWeekend) ||
+                const DeepCollectionEquality()
+                    .equals(other.lazyWeekend, lazyWeekend)));
   }
 
   @override
@@ -531,7 +557,8 @@ class _$AlarmSet implements AlarmSet {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(alarm) ^
       const DeepCollectionEquality().hash(offset) ^
-      const DeepCollectionEquality().hash(orchestratorState);
+      const DeepCollectionEquality().hash(orchestratorState) ^
+      const DeepCollectionEquality().hash(lazyWeekend);
 
   @JsonKey(ignore: true)
   @override
@@ -544,11 +571,12 @@ class _$AlarmSet implements AlarmSet {
     required TResult Function() initial,
     required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+    required TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)
         setted,
     required TResult Function() error,
   }) {
-    return setted(alarm, offset, orchestratorState);
+    return setted(alarm, offset, orchestratorState, lazyWeekend);
   }
 
   @override
@@ -557,12 +585,14 @@ class _$AlarmSet implements AlarmSet {
     TResult Function()? initial,
     TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
+    TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)?
+        setted,
     TResult Function()? error,
     required TResult orElse(),
   }) {
     if (setted != null) {
-      return setted(alarm, offset, orchestratorState);
+      return setted(alarm, offset, orchestratorState, lazyWeekend);
     }
     return orElse();
   }
@@ -597,12 +627,14 @@ class _$AlarmSet implements AlarmSet {
 }
 
 abstract class AlarmSet implements AlarmState {
-  const factory AlarmSet(Alarm alarm, int offset, bool orchestratorState) =
+  const factory AlarmSet(
+          Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend) =
       _$AlarmSet;
 
   Alarm get alarm => throw _privateConstructorUsedError;
   int get offset => throw _privateConstructorUsedError;
   bool get orchestratorState => throw _privateConstructorUsedError;
+  bool get lazyWeekend => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $AlarmSetCopyWith<AlarmSet> get copyWith =>
       throw _privateConstructorUsedError;
@@ -649,7 +681,8 @@ class _$AlarmError implements AlarmError {
     required TResult Function() initial,
     required TResult Function(Alarm alarm, int initialOffset) off,
     required TResult Function() setting,
-    required TResult Function(Alarm alarm, int offset, bool orchestratorState)
+    required TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)
         setted,
     required TResult Function() error,
   }) {
@@ -662,7 +695,9 @@ class _$AlarmError implements AlarmError {
     TResult Function()? initial,
     TResult Function(Alarm alarm, int initialOffset)? off,
     TResult Function()? setting,
-    TResult Function(Alarm alarm, int offset, bool orchestratorState)? setted,
+    TResult Function(
+            Alarm alarm, int offset, bool orchestratorState, bool lazyWeekend)?
+        setted,
     TResult Function()? error,
     required TResult orElse(),
   }) {

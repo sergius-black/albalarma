@@ -50,7 +50,7 @@ class _AlarmPageState extends State<AlarmPage> {
                 SizedBox(
                   width: 20,
                 ),
-                Text("Albalarma"),
+                Text("PaltAlarma"),
               ],
             ),
             actions: [

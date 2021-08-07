@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:albalarma/dependency_injection/injection.dart';
 import 'package:albalarma/domain/alarm/alarm.dart';
 import 'package:albalarma/domain/location/sun_times.dart';
+import 'package:albalarma/infrastructure/alarm_service/inspiration.dart';
 import 'package:albalarma/infrastructure/local_db/local_db_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -91,69 +92,54 @@ class AlarmRepository {
     getIt<AudioHandler>().customAction(_alarmRadio);
   }
 
+  // LocalDatabase _db = getIt<LocalDatabase>();
+
+  DateTime now() => DateTime.now();
+
+  bool isAfter9PM() => now().isAfter(DateTime.parse(
+      "${now().year}-${now().month.toString().padLeft(2, '0')}-${now().day.toString().padLeft(2, '0')} 21:00:00"));
+
+  bool isWeekend() =>
+      (now().weekday == 5 && isAfter9PM()) ||
+      now().weekday == 6 ||
+      (now().weekday == 7 && !isAfter9PM());
+
+  Future<bool> isNightBefore() async =>
+      ((await getIt<LocalDatabase>().nextSunrise()).day == now().day);
+
   void _alarmOrchestrator() async {
-    // bool albalarmaStatus = await getIt<LocalDatabase>().getAlbalarmaStatus();
-    int timeOffset = await getIt<LocalDatabase>().getAlarmOffset();
+    LocalDatabase _db = getIt<LocalDatabase>();
 
-    DateTime now = DateTime.now();
+    // DateTime currentAlarmTime = await _db.getAlarmTime();
 
-    DateTime currentAlarmTime = await getIt<LocalDatabase>().getAlarmTime();
-
-    SunTimes todaySunTimes = await getIt<LocalDatabase>().getTodaySuntimes();
-
-    SunTimes tomorrowSunTimes =
-        await getIt<LocalDatabase>().getTomorrowSuntimes();
-
-    bool isAfter8PM = now.isAfter(DateTime.parse(
-        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} 20:00:00"));
+    bool alarmStatus = await _db.getAlarmStatus();
 
     // check if its between friday 20:00 and sunday 20:00 so no alarm triggers in weekends
-    bool isWeekend = (now.weekday == 5 && isAfter8PM) ||
-        now.weekday == 6 ||
-        (now.weekday == 7 && !isAfter8PM);
 
-    bool weekendNoAlarm = await getIt<LocalDatabase>().getWeekendNoAlarm();
-
-    bool isWakeUpTime = now.isAfter(currentAlarmTime) &&
-        now.isBefore(currentAlarmTime.add(Duration(hours: 1)));
-
-    bool isAlarmIdleTime =
-        now.isAfter(currentAlarmTime.add(Duration(hours: 1))) && !isAfter8PM;
-
-    bool isAlarmSetTime = isAfter8PM || now.isBefore(todaySunTimes.sunrise);
-
-    bool alarmSetForToday = currentAlarmTime.isAfter(now);
+    bool lazyWeekend = await _db.getLazyWeekend();
 
     // lazy weekends with no alarm
-    if (isWeekend && weekendNoAlarm) {
-      _showAlarmTimeNotification("no alarm weekend");
+    if (isWeekend() && lazyWeekend) {
+      _showNotification("no alarm weekend");
       return;
     }
     // albalarma idle times. During the day
-    if (isAlarmIdleTime) {
-      _showAlarmTimeNotification("idle");
+    if (!isAfter9PM() && !(await isNightBefore())) {
+      _showNotification("idle");
       return;
     }
-    // between alarm time and 1 hour after it
-    if (isWakeUpTime) {
-      _showAlarmTimeNotification("wake up time");
-      return;
-    }
-    // time to set on the alarm. its after 8pm or before that days sunrise in case this triggers
+    // time to set on the alarm. its after 9pm or before that days sunrise in case this triggers
     // after midnight and no alarm was set
 
-    if (isAlarmSetTime && !alarmSetForToday) {
-      DateTime nextSunrise = now.isBefore(todaySunTimes.sunrise)
-          ? todaySunTimes.sunrise
-          : tomorrowSunTimes.sunrise;
-
-      setAlarm(nextSunrise.add(Duration(minutes: timeOffset)));
-      _showAlarmTimeNotification("alarm just set");
+    if ((isAfter9PM() && (alarmStatus == false))) {
+      setAlarm((await _db.nextSunrise())
+          .add(Duration(minutes: await _db.getAlarmOffset())));
+      _showNotification("alarm just set");
 
       return;
     }
 
-    _showAlarmTimeNotification();
+    _showNotification();
   }
 
   void _triggerAlarm() async {
@@ -173,14 +159,41 @@ class AlarmRepository {
 
     await flutterLocalNotificationsPlugin.show(
         0, 'Albalarma Activada', 'DESPIERTA MIERDA!', notificationDetails);
-
+    await getIt<LocalDatabase>().setAlarmStatus(false);
     // getIt<AudioHandler>().customAction(_alarmRadio);
   }
 
-  void _showAlarmTimeNotification([String? type]) async {
+  void _showNotification([String? type]) async {
     String alarmTimeString = await getIt<LocalDatabase>().getAlarmTimeString();
 
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    String notificationTitle = 'Albalarma Activada';
+    String notificationBody = 'a las $alarmTimeString';
+    String bigText = "big text";
+
+    if (type == "no alarm weekend") {
+      Map<String, String> fraseInspiradora = Inspiration.getInspired();
+
+      notificationTitle = "Fin de semana flojo!";
+      notificationBody =
+          "Para pensar: ${fraseInspiradora.keys.first} dijo: ${fraseInspiradora.values.first}";
+      bigText =
+          "Para pensar: ${fraseInspiradora.keys.first} dijo: ${fraseInspiradora.values.first}";
+    }
+
+    if (type == "idle") {
+      Map<String, String> fraseInspiradora = Inspiration.getInspired();
+
+      notificationTitle = "Sabias palabras de ${fraseInspiradora.keys.first}:";
+      bigText = "Sabias palabras de ${fraseInspiradora.keys.first}:";
+      notificationBody = fraseInspiradora.values.first;
+    }
+
+    if (type == "alarm just set") {
+      notificationTitle = "Albalarma Activada";
+      notificationBody = "Recien puesta la alarma para mañana";
+    }
+
+    AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'Alarm time notification Id',
       'Alarm time Notification Channel',
@@ -189,30 +202,11 @@ class AlarmRepository {
       priority: Priority.low,
       autoCancel: false,
       playSound: false,
+      styleInformation: BigTextStyleInformation(bigText),
       visibility: NotificationVisibility.public,
     );
-    String notificationTitle = 'Albalarma Activada';
-    String notificationBody = 'a las $alarmTimeString';
 
-    if (type == "no alarm weekend") {
-      notificationTitle = "Fin de semana flojo";
-      notificationBody = "Descansa y duerme mucho!";
-    }
-
-    if (type == "idle") {
-      notificationTitle = "Albalarma idle";
-      notificationBody = "Aprovecha el día!";
-    }
-
-    if (type == "wake up time") {
-      notificationBody = "Levantate flojo!";
-    }
-    if (type == "alarm just set") {
-      notificationTitle = "Albalarma Activada";
-      notificationBody = "Recien puesta la alarma para mañana";
-    }
-
-    const NotificationDetails notificationDetails =
+    NotificationDetails notificationDetails =
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
     await flutterLocalNotificationsPlugin.show(
@@ -220,7 +214,13 @@ class AlarmRepository {
   }
 
   Future<bool> setOrchestrator() async {
+    LocalDatabase _db = getIt<LocalDatabase>();
+    print(isAfter9PM());
+    print(await (_db.getAlarmStatus()));
     try {
+      int currentAlarmId = await _db.getAlarmId();
+      AndroidAlarmManager.cancel(currentAlarmId);
+
       int orchestratorId = Random().nextInt(pow(2, 31).toInt());
       print("Setting orchestrator with id: $orchestratorId");
       bool didSetOrchestrator = await AndroidAlarmManager.periodic(
@@ -232,8 +232,8 @@ class AlarmRepository {
         rescheduleOnReboot: true,
       );
       if (didSetOrchestrator) {
-        await getIt<LocalDatabase>().setOrchestratorId(orchestratorId);
-        await getIt<LocalDatabase>().setAlarmOffset(timeOffset);
+        await _db.setOrchestratorId(orchestratorId);
+        await _db.setAlarmOffset(timeOffset);
       }
       return didSetOrchestrator;
     } catch (err) {
@@ -243,6 +243,7 @@ class AlarmRepository {
   }
 
   Future<bool> setAlarm(DateTime alarmTime) async {
+    LocalDatabase _db = getIt<LocalDatabase>();
     try {
       int alarmId = Random().nextInt(pow(2, 31).toInt());
       print("Setting alarm with id: $alarmId");
@@ -258,10 +259,10 @@ class AlarmRepository {
       );
 
       if (didSetAlarm) {
-        await getIt<LocalDatabase>().setAlarmId(alarmId);
-        await getIt<LocalDatabase>()
-            .setAlarmTimeString(getTimeString(alarmTime));
-        await getIt<LocalDatabase>().setAlarmTime(alarmTime);
+        await _db.setAlarmId(alarmId);
+        await _db.setAlarmTimeString(getTimeString(alarmTime));
+        await _db.setAlarmTime(alarmTime);
+        await _db.setAlarmStatus(true);
       }
 
       return (didSetAlarm);
@@ -272,6 +273,8 @@ class AlarmRepository {
   }
 
   Future<bool> setEnsayo() async {
+    LocalDatabase _db = getIt<LocalDatabase>();
+
     print("ensayo en $timeOffset segundos");
     try {
       int orchestratorId = Random().nextInt(pow(2, 31).toInt());
@@ -284,6 +287,7 @@ class AlarmRepository {
         exact: true,
         wakeup: true,
       );
+      print("ensayo orchestrator: $didSetOrchestrator");
 
       int alarmId = Random().nextInt(pow(2, 31).toInt());
 
@@ -297,12 +301,15 @@ class AlarmRepository {
         rescheduleOnReboot: true,
       );
 
+      print("ensayo alarm: $didSetAlarm");
+
       if (didSetAlarm && didSetOrchestrator) {
-        await getIt<LocalDatabase>().setAlarmId(alarmId);
-        await getIt<LocalDatabase>().setOrchestratorId(orchestratorId);
-        await getIt<LocalDatabase>()
-            .setAlarmTimeString(getTimeString(alarmTime));
-        await getIt<LocalDatabase>().setAlarmTime(alarmTime);
+        await _db.setAlarmId(alarmId);
+        await _db.setOrchestratorId(orchestratorId);
+        await _db.setAlarmTimeString(getTimeString(alarmTime));
+        await _db.setAlarmTime(alarmTime);
+        await _db.setAlarmStatus(true);
+        await _db.setOrchestratorStatus(true);
       }
 
       return (didSetAlarm && didSetOrchestrator);
@@ -323,8 +330,11 @@ class AlarmRepository {
   }
 
   Future<bool> cancelAll() async {
-    int orchestratorId = await getIt<LocalDatabase>().getOrchestratorId();
-    int alarmId = await getIt<LocalDatabase>().getAlarmId();
+    LocalDatabase _db = getIt<LocalDatabase>();
+    int orchestratorId = await _db.getOrchestratorId();
+    int alarmId = await _db.getAlarmId();
+    await _db.setAlarmStatus(false);
+    await _db.setOrchestratorStatus(false);
 
     bool cancelOrchestrator = await AndroidAlarmManager.cancel(orchestratorId);
     bool cancelAlarm = await AndroidAlarmManager.cancel(alarmId);
@@ -334,8 +344,11 @@ class AlarmRepository {
   }
 
   Future<bool> cancelOrchestrator() async {
-    int orchestratorId = await getIt<LocalDatabase>().getOrchestratorId();
+    LocalDatabase _db = getIt<LocalDatabase>();
+
+    int orchestratorId = await _db.getOrchestratorId();
     bool cancelOrchestrator = await AndroidAlarmManager.cancel(orchestratorId);
+    await _db.setOrchestratorStatus(false);
     print("cancelled orchestrator");
     return (cancelOrchestrator);
   }
