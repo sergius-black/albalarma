@@ -1,6 +1,7 @@
 # Albalarma  - Sunrise Alarm
 Nature and palta (avocado) inspired alarm clock \
 It detects your current location, fetches from the internet the time of the next sunrise and sets an alarm accordingly \
+It gives inspiring quotes periodically for.... inspiration
 Also its a good boilerplate for new projects since its designed around DDD concepts \
 \
 Some of the dependencies it uses: 
