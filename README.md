@@ -1,8 +1,8 @@
 What is albalarma?
 
-it's a flutter app that wakes you up at sunrise. \
-It's a tool I built to have a lifestyle more according to nature instead of our corporate overlords. I used it to learn flutter and since its quality is somewhat doubtful but still good enough to be useful to myself, \
-it's not in any store so for any reason you would like to use it, \ 
+it's a flutter app that wakes you up at sunrise. 
+It's a tool I built to have a lifestyle more according to nature instead of our corporate overlords. I used it to learn flutter and since its quality is somewhat doubtful but still good enough to be useful to myself, 
+it's not in any store so for any reason you would like to use it, 
 it has to be built and sideloaded.
 
 
