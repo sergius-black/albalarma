@@ -1,8 +1,18 @@
-# Albalarma  - Sunrise Alarm
-Nature and palta (avocado) inspired alarm clock \
+What is albalarma?
+
+it's a flutter app that wakes you up at sunrise. \
+It's a tool I built to have a lifestyle more according to nature instead of \
+our corporate overlords. I used it to learn flutter and \
+since its quality is somewhat doubtful but still good enough to be useful to myself, \
+it's not in any store so for any reason you would like to use it, \ 
+it has to be built and sideloaded.
+
+
+how it works:
+
 It detects your current location, fetches from the internet the time of the next sunrise and sets an alarm accordingly \
-It gives inspiring quotes periodically for.... inspiration
-Also its a good boilerplate for new projects since its designed around DDD concepts \
+As for the alarm, I decided to use local radio stations to either start the day with good music or updated on the news.\ 
+It also gives inspiring quotes periodically for.... inspiration \
 \
 Some of the dependencies it uses: 
 - Dio -> http requests and great music 🤘
