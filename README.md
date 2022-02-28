@@ -8,8 +8,8 @@ it has to be built and sideloaded.
 
 how it works:
 
-It detects your current location, fetches from the internet the time of the next sunrise and sets an alarm accordingly \
-As for the alarm, I decided to use local radio stations to either start the day with good music or updated on the news.\ 
+It detects your current location, fetches from the internet the time of the next sunrise and sets an alarm accordingly 
+As for the alarm, I decided to use local radio stations to either start the day with good music or updated on the news.
 It also gives inspiring quotes periodically for.... inspiration \
 \
 Some of the dependencies it uses: 
